@@ -16,7 +16,7 @@ class Whatsappdb():
         self.importContacts()
         # print(self.contacts)
         self.importChats()
-
+        self.Me='Me'
     def connectCursor(self, dbname):
         conn = sqlite3.connect(dbname)
         return conn.cursor()
@@ -67,7 +67,17 @@ class Whatsappdb():
         # print(self.chats)
 
     def getChatParticipants(self, jidstring):
-        pass
+        cursor = self.connectCursor(databases['msgstore'])
+        query="""SELECT jid FROM group_participants WHERE gjid=='{}'""".format(
+            jidstring)
+        result = cursor.execute(query)
+        particip=[]
+        for q in  result:
+            if q[0] =='':
+                particip.append(self.Me)
+            else:
+                particip.append(q[0])
+        print(particip)
 
     def getChatMessages(self, jidstring):
         cursor = self.connectCursor(databases['msgstore'])
@@ -85,3 +95,4 @@ class Whatsappdb():
 
 wa = Whatsappdb()
 wa.getChatMessages('5353311973-1578884291@g.us')
+wa.getChatParticipants('5353311973-1578884291@g.us')
