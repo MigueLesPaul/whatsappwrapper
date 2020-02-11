@@ -65,6 +65,7 @@ class Whatsappdb():
                 self.chats[ c[0] ] = self.getContactName(c[0]) 
             else:
                 self.chats[ c[0] ] = c[1]
+        self.jid=jid        
         print(self.chats)
         
         
