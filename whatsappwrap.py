@@ -20,7 +20,7 @@ class Whatsappdb():
     def __init__(self):
         self.importContacts()
         # print(self.contacts)       
-
+        self.importChats()
     def importContacts(self):
         """ Import contacts names from the wa.db database if present """
         
@@ -34,13 +34,39 @@ class Whatsappdb():
         for q in result:
             self.contacts[q[0]]={'display_name':q[1], 'wa_name':q[2]}
     
+    def getContactName(self,jidstring):
+        # print(jidstring)
+        if jidstring in self.contacts:
+            if self.contacts[jidstring]["display_name"]==None:
+                return self.contacts[jidstring]["wa_name"]
+            else:
+                return self.contacts[jidstring]["display_name"]
+            
     def importChats(self):
         """Get all the chats with its names or descriptions """
         conn = sqlite3.connect(databases['msgstore'])
         cursor=conn.cursor()
         
+        jidquery="""SELECT  _id,raw_string FROM jid;"""
+        jids=cursor.execute(jidquery).fetchall()
+        jid={}
         
-        jidquery="""SELECT  id,raw_string FROM jid;"""
+        for j in jids:
+            jid[j[0]]=j[1]
+        
+    
+        chatquery="""SELECT key_remote_jid,subject FROM chat_list; """
+        chats=cursor.execute(chatquery).fetchall()
+        # print(chats)
+        self.chats={}
+        
+        for c in chats:
+            if c[1] == None:
+                self.chats[ c[0] ] = self.getContactName(c[0]) 
+            else:
+                self.chats[ c[0] ] = c[1]
+        print(self.chats)
+        
         
     
     
