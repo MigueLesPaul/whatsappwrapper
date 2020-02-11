@@ -21,12 +21,16 @@ class Whatsappdb():
         self.importContacts()
         # print(self.contacts)       
         self.importChats()
+    
+    def connectCursor(self,dbname):
+        conn = sqlite3.connect(dbname)
+        return conn.cursor()
+            
     def importContacts(self):
         """ Import contacts names from the wa.db database if present """
         
-        conn=sqlite3.connect(databases['contacts'])
-        cursor=conn.cursor()
-        
+        cursor=self.connectCursor(databases['contacts'])
+ 
         query=""" SELECT jid, display_name,wa_name  FROM wa_contacts;"""
         
         result=cursor.execute(query).fetchall()
@@ -44,8 +48,8 @@ class Whatsappdb():
             
     def importChats(self):
         """Get all the chats with its names or descriptions """
-        conn = sqlite3.connect(databases['msgstore'])
-        cursor=conn.cursor()
+        
+        cursor=self.connectCursor(databases['msgstore'])
         
         jidquery="""SELECT  _id,raw_string FROM jid;"""
         jids=cursor.execute(jidquery).fetchall()
@@ -66,10 +70,15 @@ class Whatsappdb():
             else:
                 self.chats[ c[0] ] = c[1]
         self.jid=jid        
-        print(self.chats)
+        # print(self.chats)
         
+    def getChatMessages(self,jidstring):
+        cursor=self.connectCursor(databases['msgstore'])
         
-    
+        msgquery="""SELECT remote_resource,data,received_timestamp FROM messages WHERE key_remote_jid=='{}'""".format(jidstring)
+        msgs=cursor.execute(msgquery).fetchall()
+        print(msgs)
+        
     
     
     def __str__(self):
@@ -79,37 +88,5 @@ class Whatsappdb():
 
 
 
-
-# # command="select * from messages where key_remote_jid == '5354414448-1549139529@g.us' ;"
-# command="select * from messages;"
-# command="select key_remote_jid,data,remote_resource,received_timestamp from messages; "
-# cursor.execute(command)
-
-# result=[]
-
 wa=Whatsappdb()
-
-# for q in cursor:
-#     # result.append(q[0])
-#     if q[0]=='5354414448-1549139529@g.us':
-#         result=q
-#     else:
-#         continue
-#     if result[2]==None:
-#         person="Miguel"
-#     else:
-#         cmd="select jid,number,display_name,wa_name from wa_contacts where jid=='{}'  ".format(result[2])
-#         cursorwa.execute(cmd)
-#         query=cursorwa.fetchone()
-#         if query[2]==None:
-#             person=query[3]
-#         else:
-#             person=query[2]
-            
-            
-#     print("--{}\n{}:{}   ".format(q[3],person,q[1]))
-        
-        
-    # print(q)
-
-# print (result)
+wa.getChatMessages('5353311973-1578884291@g.us')
