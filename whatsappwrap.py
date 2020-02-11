@@ -16,24 +16,43 @@ databases={                                                              #PorDef
 
 
 
+class Whatsappdb():
+    def __init__(self):
+        self.importContacts()
+        # print(self.contacts)       
 
-def importContacts():
-    """ Import contacts from the wa.db database if present """
+    def importContacts(self):
+        """ Import contacts names from the wa.db database if present """
+        
+        conn=sqlite3.connect(databases['contacts'])
+        cursor=conn.cursor()
+        
+        query=""" SELECT jid, display_name,wa_name  FROM wa_contacts;"""
+        
+        result=cursor.execute(query).fetchall()
+        self.contacts={}
+        for q in result:
+            self.contacts[q[0]]={'display_name':q[1], 'wa_name':q[2]}
     
-    conn=sqlite3.connect(databases['contacts'])
-    cursor=conn.cursor()
+    def importChats(self):
+        """Get all the chats with its names or descriptions """
+        conn = sqlite3.connect(databases['msgstore'])
+        cursor=conn.cursor()
+        
+        
+        jidquery="""SELECT  id,raw_string FROM jid;"""
+        
     
-    query=""" SELECT jid, display_name,wa_name  FROM wa_contacts;"""
     
-    result=cursor.execute(query).fetchall()
-    contacts={}
-    for q in result:
-        contacts[q[0]]={'display_name':q[1], 'wa_name':q[2]}
-    print(contacts)
+    
+    def __str__(self):
+        out=""" """
+        for k in self.contacts.keys():
+            out = """ """.join([self.contacts[k]['display_name']  ])
 
 
-conn = sqlite3.connect(databases['msgstore'])
-cursor=conn.cursor()
+
+
 # # command="select * from messages where key_remote_jid == '5354414448-1549139529@g.us' ;"
 # command="select * from messages;"
 # command="select key_remote_jid,data,remote_resource,received_timestamp from messages; "
@@ -41,8 +60,7 @@ cursor=conn.cursor()
 
 # result=[]
 
-importContacts()
-
+wa=Whatsappdb()
 
 # for q in cursor:
 #     # result.append(q[0])
